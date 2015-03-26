@@ -17,5 +17,11 @@
     "reporter"
   ],
   "author": "Sauli Tähkäpää",
-  "license": "Apache 2.0"
+  "license": "Apache 2.0",
+  "devDependencies": {
+    "chai": "^2.1.2",
+    "mocha": "^2.2.1",
+    "mockery": "^1.4.0",
+    "sinon": "^1.14.1"
+  }
 }
