@@ -42,28 +42,26 @@ describe('gemini-teamcity', function() {
 
     function init() {
       plugin(gemini, {});
-    };
-
+    }
     function startRunner() {
       gemini.startRunner(runner);
-    };
-
-    beforeEach(function() {
+    }
+    beforeEach(function () {
       init();
 
       runner = sinon.spy();
       runner.on = sinon.spy();
     });
 
-    it('should register beginState', function() {
+    it('should register beginState', function () {
       startRunner();
 
       expect(runner.on.args[0][0]).to.equal('beginState');
     });
 
-    describe('on beginState', function() {
-      beforeEach(function() {
-        runner.on = sinon.spy(function(event, cb) {
+    describe('on beginState', function () {
+      beforeEach(function () {
+        runner.on = sinon.spy(function (event, cb) {
           runner[event] = cb;
         });
 
@@ -77,7 +75,7 @@ describe('gemini-teamcity', function() {
       //  suiteId: state.suite.id,
       //  stateName: state.name
 
-      it('should log test started to console', function() {
+      it('should log test started to console', function () {
         runner.beginState({
           browserId: 'chrome',
           suiteFullName: 'suite',
@@ -87,7 +85,7 @@ describe('gemini-teamcity', function() {
         expect(_console.log.args[0][0]).to.equal('##teamcity[testStarted name=\'suite.state.chrome\']');
       });
 
-      it('should trim the suite name from spaces', function() {
+      it('should trim the suite name from spaces', function () {
         runner.beginState({
           browserId: 'chrome',
           suiteFullName: ' suite ',
@@ -97,7 +95,7 @@ describe('gemini-teamcity', function() {
         expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome\'');
       });
 
-      it('should trim the state name from spaces', function() {
+      it('should trim the state name from spaces', function () {
         runner.beginState({
           browserId: 'chrome',
           suiteFullName: 'suite',
@@ -107,7 +105,7 @@ describe('gemini-teamcity', function() {
         expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome\'');
       });
 
-      it('should trim browserId from spaces', function() {
+      it('should trim browserId from spaces', function () {
         runner.beginState({
           browserId: ' chrome 41 ',
           suiteFullName: 'suite',
@@ -117,7 +115,7 @@ describe('gemini-teamcity', function() {
         expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome41\'');
       });
 
-      it('should replace spaces with underscore', function() {
+      it('should replace spaces with underscore', function () {
         runner.beginState({
           browserId: 'chrome 41',
           suiteFullName: ' root suite ',
@@ -127,19 +125,193 @@ describe('gemini-teamcity', function() {
         expect(_console.log.args[0][0]).to.contain('\'root_suite.state_number_two.chrome41\'');
       });
     });
-  });
 
-  it('should report test start', function() {
-    plugin(gemini, {});
-    var runner = sinon.spy();
-    runner.on = sinon.spy(function(event, cb) {
-      runner[event] = cb;
+    describe('on skipState', function () {
+      beforeEach(function () {
+        runner.on = sinon.spy(function (event, cb) {
+          runner[event] = cb;
+        });
+
+        startRunner();
+      });
+
+      it('should log test ignored to console', function () {
+        runner.skipState({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state'
+        });
+
+        expect(_console.log.args[0][0]).to.equal('##teamcity[testIgnored name=\'suite.state.chrome\']');
+      });
+
+      it('should trim the suite name from spaces', function () {
+        runner.skipState({
+          browserId: 'chrome',
+          suiteFullName: ' suite ',
+          stateName: 'state'
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome\'');
+      });
+
+      it('should trim the state name from spaces', function () {
+        runner.skipState({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: ' state '
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome\'');
+      });
+
+      it('should trim browserId from spaces', function () {
+        runner.skipState({
+          browserId: ' chrome 41 ',
+          suiteFullName: 'suite',
+          stateName: 'state'
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome41\'');
+      });
+
+      it('should replace spaces with underscore', function () {
+        runner.skipState({
+          browserId: 'chrome 41',
+          suiteFullName: ' root suite ',
+          stateName: ' state number two'
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'root_suite.state_number_two.chrome41\'');
+      });
     });
 
-    //gemini.startRunner(runner);
+    describe('on error', function() {
+      beforeEach(function () {
+        runner.on = sinon.spy(function (event, cb) {
+          runner[event] = cb;
+        });
 
-    //runner.beginState();
+        startRunner();
+      });
 
-    //expect(_console.log.args[0][0]).to.equal('foo');
+      it('should log test finished to console', function () {
+        runner.error({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state'
+        });
+
+        expect(_console.log.args[1][0]).to.equal('##teamcity[testFinished name=\'suite.state.chrome\']');
+      });
+
+      it('should log test failed to console', function() {
+        runner.error({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state'
+        });
+
+        expect(_console.log.args[0][0]).to.contain('##teamcity[testFailed name=\'suite.state.chrome\'');
+      });
+
+      it('should log the error message', function() {
+        runner.error({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state',
+          message: 'error message'
+        });
+
+        expect(_console.log.args[0][0]).to.contain('message=\'error message\'');
+      });
+
+      it('should log the stack', function() {
+        runner.error({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state',
+          stack: 'stack'
+        });
+
+        expect(_console.log.args[0][0]).to.contain('details=\'stack\'');
+      });
+    });
+
+    describe('on endTest', function () {
+      beforeEach(function () {
+        runner.on = sinon.spy(function (event, cb) {
+          runner[event] = cb;
+        });
+
+        startRunner();
+      });
+
+      it('should log test finished to console', function () {
+        runner.endTest({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state',
+          equal: true
+        });
+
+        expect(_console.log.args[0][0]).to.equal('##teamcity[testFinished name=\'suite.state.chrome\']');
+      });
+
+      it('should log test failed to console', function() {
+        runner.endTest({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: 'state',
+          equal: 'foobar'
+        });
+
+        expect(_console.log.args[0][0]).to.equal('##teamcity[testFailed name=\'suite.state.chrome\']');
+      });
+
+      it('should trim the suite name from spaces', function () {
+        runner.endTest({
+          browserId: 'chrome',
+          suiteFullName: ' suite ',
+          stateName: 'state',
+          equal: true
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome\'');
+      });
+
+      it('should trim the state name from spaces', function () {
+        runner.endTest({
+          browserId: 'chrome',
+          suiteFullName: 'suite',
+          stateName: ' state ',
+          equal: true
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome\'');
+      });
+
+      it('should trim browserId from spaces', function () {
+        runner.endTest({
+          browserId: ' chrome 41 ',
+          suiteFullName: 'suite',
+          stateName: 'state',
+          equal: true
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'suite.state.chrome41\'');
+      });
+
+      it('should replace spaces with underscore', function () {
+        runner.endTest({
+          browserId: 'chrome 41',
+          suiteFullName: ' root suite ',
+          stateName: ' state number two',
+          equal: true
+        });
+
+        expect(_console.log.args[0][0]).to.contain('\'root_suite.state_number_two.chrome41\'');
+      });
+    });
   });
 });
