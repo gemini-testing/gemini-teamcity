@@ -57,7 +57,7 @@ describe('gemini-teamcity', function() {
         browserId: 'chrome',
         suite: {
           name: 'state',
-          fullName: 'suite'
+          fullName: 'suite state'
         }
       };
     });
@@ -96,7 +96,7 @@ describe('gemini-teamcity', function() {
       });
 
       it('should trim the suite name from spaces', function () {
-        eventData.suite.fullName = ' suite ';
+        eventData.suite.fullName = ' suite state ';
 
         runner.beginState(eventData);
 
@@ -121,13 +121,23 @@ describe('gemini-teamcity', function() {
 
       it('should replace spaces with underscore', function () {
         eventData.browserId = 'chrome 41';
-        eventData.suite.fullName = ' root suite ';
+        eventData.suite.fullName = ' root suite state number two ';
         eventData.suite.name = ' state number two';
 
         runner.beginState(eventData);
 
         expect(_console.log.args[0][0]).to.contain('\'root_suite.state_number_two.chrome41\'');
       });
+
+      it('should separate state name with a dot', function() {
+        eventData.suite.fullName = 'foo bar bar';
+        eventData.suite.name = 'bar';
+
+        runner.beginState(eventData);
+
+        expect(_console.log.args[0][0]).to.contain('\'foo_bar.bar.chrome\'');
+      });
+
     });
 
     describe('on skipState', function () {
@@ -146,7 +156,7 @@ describe('gemini-teamcity', function() {
       });
 
       it('should trim the suite name from spaces', function () {
-        eventData.suite.fullName = ' suite ';
+        eventData.suite.fullName = ' suite state ';
 
         runner.skipState(eventData);
 
@@ -171,12 +181,21 @@ describe('gemini-teamcity', function() {
 
       it('should replace spaces with underscore', function () {
         eventData.browserId = 'chrome 41';
-        eventData.suite.fullName = ' root suite ';
+        eventData.suite.fullName = ' root suite state number two ';
         eventData.suite.name = ' state number two';
 
         runner.skipState(eventData);
 
         expect(_console.log.args[0][0]).to.contain('\'root_suite.state_number_two.chrome41\'');
+      });
+
+      it('should separate state name with a dot', function() {
+        eventData.suite.fullName = 'foo bar bar';
+        eventData.suite.name = 'bar';
+
+        runner.skipState(eventData);
+
+        expect(_console.log.args[0][0]).to.contain('\'foo_bar.bar.chrome\'');
       });
     });
 
@@ -215,6 +234,15 @@ describe('gemini-teamcity', function() {
 
         expect(_console.log.args[0][0]).to.contain('details=\'stack\'');
       });
+
+      it('should separate state name with a dot', function() {
+        eventData.suite.fullName = 'foo bar bar';
+        eventData.suite.name = 'bar';
+
+        runner.error(eventData);
+
+        expect(_console.log.args[0][0]).to.contain('\'foo_bar.bar.chrome\'');
+      });
     });
 
     describe('on endTest', function () {
@@ -243,7 +271,7 @@ describe('gemini-teamcity', function() {
       });
 
       it('should trim the suite name from spaces', function () {
-        eventData.suite.fullName = ' suite ';
+        eventData.suite.fullName = ' suite state ';
 
         runner.endTest(eventData);
 
@@ -268,13 +296,23 @@ describe('gemini-teamcity', function() {
 
       it('should replace spaces with underscore', function () {
         eventData.browserId = 'chrome 41';
-        eventData.suite.fullName = ' root suite ';
+        eventData.suite.fullName = ' root suite state number two ';
         eventData.suite.name = ' state number two';
 
         runner.endTest(eventData);
 
         expect(_console.log.args[0][0]).to.contain('\'root_suite.state_number_two.chrome41\'');
       });
+
+      it('should separate state name with a dot', function() {
+        eventData.suite.fullName = 'foo bar bar';
+        eventData.suite.name = 'bar';
+
+        runner.endTest(eventData);
+
+        expect(_console.log.args[0][0]).to.contain('\'foo_bar.bar.chrome\'');
+      });
+
     });
   });
 });
