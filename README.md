@@ -3,8 +3,8 @@ Plugin for Gemini which enables reporting test results to TeamCity.
 
 [![Build Status](https://travis-ci.org/Saulis/gemini-teamcity.svg?branch=master)](https://travis-ci.org/Saulis/gemini-teamcity)
 
-## Notes
-Requires a version of gemini that supports plugin loading. See https://github.com/bem/gemini/pull/127
+## Requirements
+Works with [gemini](https://github.com/gemini-testing/gemini) [v0.11](https://github.com/gemini-testing/gemini/releases/tag/v0.11.0) or later.
 
 ## Installation 
 `npm install gemini-teamcity`
