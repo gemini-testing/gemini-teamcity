@@ -12,6 +12,7 @@
   },
   "keywords": [
     "gemini",
+    "gemini-plugin",
     "teamcity",
     "test",
     "reporter"
