@@ -24,5 +24,8 @@
     "mocha": "^2.2.1",
     "mockery": "^1.4.0",
     "sinon": "^1.14.1"
+  },
+  "dependencies": {
+    "teamcity-service-messages": "^0.1.6"
   }
 }
