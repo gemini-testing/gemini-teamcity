@@ -1,4 +1,4 @@
-# gemini-express
+# gemini-teamcity
 Plugin for Gemini which enables reporting test results to TeamCity.
 
 [![Build Status](https://travis-ci.org/Saulis/gemini-teamcity.svg?branch=master)](https://travis-ci.org/Saulis/gemini-teamcity)
