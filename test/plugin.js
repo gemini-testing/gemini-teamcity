@@ -8,7 +8,7 @@ var plugin = require('../lib/plugin');
 
 describe('gemini-teamcity', function() {
     var gemini, runner, data, messageName;
-    
+
     beforeEach(function() {
         gemini = new EventEmitter();
         runner = new EventEmitter();
@@ -26,7 +26,7 @@ describe('gemini-teamcity', function() {
         messageName = {
             name: 'Suite_full_name.State_name.Firefox'
         };
-        
+
         plugin(gemini);
         gemini.emit('startRunner', runner);
     });
@@ -36,11 +36,10 @@ describe('gemini-teamcity', function() {
             sinon.stub(tsm, 'testStarted');
             runner.emit('beginState', data);
         });
-        
+
         afterEach(function() {
             tsm.testStarted.restore();
         });
-        
 
         it('should call "testStarted" with proper args', function() {
             assert.isTrue(tsm.testStarted.called);
@@ -117,7 +116,7 @@ describe('gemini-teamcity', function() {
             afterEach(function() {
                 tsm.testFailed.restore();
             });
-            
+
             it('should call "testFailed" with proper args', function() {
                 assert.isTrue(tsm.testFailed.called);
                 assert.isTrue(tsm.testFailed.withArgs(messageName).called);

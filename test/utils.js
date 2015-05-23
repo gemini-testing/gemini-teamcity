@@ -1,4 +1,3 @@
-var sinon = require('sinon');
 var assert = require('chai').assert;
 
 var utils = require('../lib/utils');
@@ -21,7 +20,7 @@ describe('getTestName', function() {
 
     it('should trim the suite name from spaces', function() {
         data.suite.fullName = ' suite ';
-        
+
         var actual = func(data);
         var expected = 'suite.state.chrome';
 
