@@ -20,11 +20,13 @@ describe('gemini-teamcity', function() {
             state: {
                 name: 'State name'
             },
-            browserId: 'Firefox'
+            browserId: 'Firefox',
+            sessionId: 'sessionId'
         };
 
         messageName = {
-            name: 'Suite_full_name.State_name.Firefox'
+            name: 'Suite_full_name.State_name.Firefox',
+            flowId: 'sessionId'
         };
 
         plugin(gemini);
