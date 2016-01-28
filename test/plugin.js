@@ -71,7 +71,7 @@ describe('gemini-teamcity', function() {
             data.message = 'error message';
             sinon.stub(tsm, 'testFailed');
             sinon.stub(tsm, 'testFinished');
-            runner.emit('error', data);
+            runner.emit('err', data);
         });
 
         afterEach(function() {
