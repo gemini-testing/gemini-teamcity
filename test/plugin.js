@@ -3,17 +3,18 @@ var EventEmitter = require('events').EventEmitter;
 var sinon = require('sinon');
 var assert = require('chai').assert;
 var tsm = require('teamcity-service-messages');
+var _ = require('lodash');
 
 var plugin = require('../lib/plugin');
 
+sinon.assert.expose(assert, {prefix: ''});
+
 describe('gemini-teamcity', function() {
-    var gemini, runner, data, messageName;
+    var sandbox = sinon.sandbox.create(),
+        gemini, runner;
 
-    beforeEach(function() {
-        gemini = new EventEmitter();
-        runner = new EventEmitter();
-
-        data = {
+    function stubEventData_(opts) {
+        return _.defaults(opts || {}, {
             suite: {
                 fullName: 'Suite full name'
             },
@@ -21,108 +22,93 @@ describe('gemini-teamcity', function() {
                 name: 'State name'
             },
             browserId: 'Firefox',
-            sessionId: 'sessionId'
-        };
+            sessionId: 'sessionId',
+            equal: true
+        });
+    }
 
-        messageName = {
-            name: 'Suite_full_name.State_name.Firefox',
-            flowId: 'sessionId'
-        };
+    beforeEach(function() {
+        gemini = new EventEmitter();
+        runner = new EventEmitter();
 
         plugin(gemini);
         gemini.emit('startRunner', runner);
+
+        sandbox.stub(tsm);
     });
 
+    afterEach(function() {
+        sandbox.restore();
+    });
+
+    function testArgs_(event, handleMethod, specificData) {
+        specificData = specificData || {};
+
+        it('should call "' + event + '" with proper full test name', function() {
+            var data = _.extend({
+                    browserId: 'some-browser',
+                    state: {name: 'some-state'},
+                    suite: {fullName: 'some suite'}
+                }, specificData);
+
+            runner.emit(event, stubEventData_(data));
+
+            assert.calledOnce(tsm[handleMethod]);
+            assert.calledWithMatch(tsm[handleMethod], {
+                name: 'some_suite.some-state.some-browser'
+            });
+        });
+
+        it('should use sessionId as flowId', function() {
+            var data = _.extend({
+                    sessionId: 'some-session-id'
+                }, specificData);
+
+            runner.emit(event, stubEventData_(data));
+
+            assert.calledWithMatch(tsm[handleMethod], {
+                flowId: 'some-session-id'
+            });
+        });
+    }
+
     describe('on beginState', function() {
-        beforeEach(function() {
-            sinon.stub(tsm, 'testStarted');
-            runner.emit('beginState', data);
-        });
-
-        afterEach(function() {
-            tsm.testStarted.restore();
-        });
-
-        it('should call "testStarted" with proper args', function() {
-            assert.isTrue(tsm.testStarted.called);
-            assert.isTrue(tsm.testStarted.withArgs(messageName).called);
-        });
+        testArgs_('beginState', 'testStarted');
     });
 
     describe('on skipState', function() {
-        beforeEach(function() {
-            sinon.stub(tsm, 'testIgnored');
-            runner.emit('skipState', data);
-        });
+        testArgs_('skipState', 'testIgnored');
+    });
 
-        afterEach(function() {
-            tsm.testIgnored.restore();
-        });
+    describe('on endTest', function() {
+        testArgs_('endTest', 'testFinished');
 
-        it('should call "testIgnored" with proper args', function() {
-            assert.isTrue(tsm.testIgnored.called);
-            assert.isTrue(tsm.testIgnored.withArgs(messageName).called);
+        describe('Test is failed', function() {
+            testArgs_('endTest', 'testFailed', {equal: false});
         });
     });
 
     describe('on error', function() {
-        beforeEach(function() {
-            data.stack = 'error stack';
-            data.message = 'error message';
-            sinon.stub(tsm, 'testFailed');
-            sinon.stub(tsm, 'testFinished');
-            runner.emit('err', data);
-        });
+        it('should call "testFailed" with stack and message', function() {
+            runner.emit('err', stubEventData_({
+                stack: 'error stack',
+                message: 'error message'
+            }));
 
-        afterEach(function() {
-            tsm.testFailed.restore();
-            tsm.testFinished.restore();
-        });
-
-        it('should call "testFailed"', function() {
-            messageName.details = 'error stack';
-            messageName.message = 'error message';
-            assert.isTrue(tsm.testFailed.called);
-            assert.isTrue(tsm.testFailed.withArgs(messageName).called);
-        });
-
-        it('should call "testFinished" with proper args', function() {
-            assert.isTrue(tsm.testFinished.called);
-            assert.isTrue(tsm.testFinished.withArgs(messageName).called);
-        });
-    });
-
-    describe('on endTest', function() {
-        beforeEach(function() {
-            data.equal = true;
-            sinon.stub(tsm, 'testFinished');
-            runner.emit('endTest', data);
-        });
-
-        afterEach(function() {
-            tsm.testFinished.restore();
-        });
-
-        it('should call "testFinished" with proper args', function() {
-            assert.isTrue(tsm.testFinished.called);
-            assert.isTrue(tsm.testFinished.withArgs(messageName).called);
-        });
-
-        describe('Test is failed', function() {
-            beforeEach(function() {
-                data.equal = false;
-                sinon.stub(tsm, 'testFailed');
-                runner.emit('endTest', data);
+            assert.calledOnce(tsm.testFailed);
+            assert.calledWithMatch(tsm.testFailed, {
+                details: 'error stack',
+                message: 'error message'
             });
+        });
 
-            afterEach(function() {
-                tsm.testFailed.restore();
-            });
+        it('should call "testFinished"', function() {
+            runner.emit('err', stubEventData_({
+                stack: 'error stack',
+                message: 'error message'
+            }));
 
-            it('should call "testFailed" with proper args', function() {
-                assert.isTrue(tsm.testFailed.called);
-                assert.isTrue(tsm.testFailed.withArgs(messageName).called);
-            });
+            assert.calledOnce(tsm.testFinished);
         });
     });
 });
