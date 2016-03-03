@@ -25,6 +25,7 @@
     "sinon": "^1.14.1"
   },
   "dependencies": {
-    "teamcity-service-messages": "^0.1.6"
+    "teamcity-service-messages": "^0.1.6",
+    "lodash": "^4.0.0"
   }
 }
