@@ -78,11 +78,11 @@ describe('gemini-teamcity', function() {
         testArgs_('skipState', 'testIgnored');
     });
 
-    describe('on endTest', function() {
-        testArgs_('endTest', 'testFinished');
+    describe('on endState', function() {
+        testArgs_('endState', 'testFinished');
 
         describe('Test is failed', function() {
-            testArgs_('endTest', 'testFailed', {equal: false});
+            testArgs_('endState', 'testFailed', {equal: false});
         });
     });
 
@@ -137,8 +137,8 @@ describe('gemini-teamcity', function() {
             });
 
             it('should not fail already finished suite states', function() {
-                runner.emit('endTest', _.defaults({state: state1}, data));
-                runner.emit('endTest', _.defaults({state: state2, equal: false}, data));
+                runner.emit('endState', _.defaults({state: state1}, data));
+                runner.emit('endState', _.defaults({state: state2, equal: false}, data));
 
                 runner.emit('err', data);
 
