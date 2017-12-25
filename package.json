@@ -1,6 +1,6 @@
 {
   "name": "gemini-teamcity",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "description": "Plugin for Gemini which enables reporting test results to TeamCity.",
   "main": "lib/plugin.js",
   "scripts": {
